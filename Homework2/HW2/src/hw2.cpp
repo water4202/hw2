@@ -56,25 +56,13 @@ int main(int argc, char **argv)
     // Calculate position error(feedback term)
     pos_err.x = goal_point.x - pose.x;
     pos_err.y = goal_point.y - pose.y;
+    pos_err.theta = atan2(pos_err.y,pos_err.x)-pose.theta;
     
-    if(atan2(pos_err.y,pos_err.x)>0)
-	pos_err.theta = atan2(pos_err.y,pos_err.x)-pose.theta;
-    else if(atan2(pos_err.y,pos_err.x)<-0.2)
-	pos_err.theta = atan2(pos_err.y,pos_err.x)-pose.theta+2*M_PI;
+    vel_msg.angular.z=1.5*pos_err.theta;
+    vel_msg.linear.x = 0.5*sqrt(pow(pos_err.x,2)+pow(pos_err.y,2));
 
-    if(pos_err.theta>0.05)
-	vel_msg.angular.z=0.3;
-    else if(pos_err.theta<-0.05)
-	vel_msg.angular.z=-0.3;
-    else
-    {
+    if(pos_err.x==0&&pos_err.y==0)
 	vel_msg.angular.z=0;
-	if(abs(pos_err.x)>0.05||abs(pos_err.y)>0.05)
-	    vel_msg.linear.x = 0.2;
-	else
-	    vel_msg.linear.x = 0;
-    }
-    
     
     turtlesim_pub.publish(vel_msg);
 
